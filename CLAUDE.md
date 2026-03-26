@@ -23,6 +23,7 @@ Open Xcode: `open ios/Runner.xcworkspace`
 
 - **State**: Riverpod (`flutter_riverpod`) — providers in `lib/providers/`
 - **Google Sheets**: Service Account auth via `googleapis` + `googleapis_auth`
+- **Apple Health**: HealthKit integration via `health: ^10.2.0` — writes BP, HR, glucose on save
 - **Auth**: Face ID via `local_auth`
 - **Charts**: `fl_chart`
 - **Env**: `flutter_dotenv` loads `.env` bundled as asset
@@ -35,6 +36,7 @@ Open Xcode: `open ios/Runner.xcworkspace`
 | `lib/config/env.dart` | Reads SPREADSHEET_ID / SHEET_NAME from .env |
 | `lib/models/health_record.dart` | Data model + sheet row serialization |
 | `lib/services/sheets_service.dart` | Reads/appends/deletes Google Sheets rows |
+| `lib/services/health_kit_service.dart` | Writes records to Apple Health (HealthKit) |
 | `lib/services/auth_service.dart` | Face ID wrapper |
 | `lib/providers/records_provider.dart` | AsyncNotifier for records list |
 | `assets/credentials/service_account.json` | GITIGNORED — place manually |
@@ -62,3 +64,12 @@ Both are in `.gitignore`. Use `.env.example` as the template.
 - After saving a new record, app navigates automatically to Records tab (`selectedTabProvider`)
 - Delete requires swipe-left → red button → confirmation dialog
 - UI language: English
+
+## iOS / HealthKit
+
+- Minimum deployment target: **iOS 14.0**
+- HealthKit entitlement: `ios/Runner/Runner.entitlements`
+- Permissions declared in `Info.plist`: `NSHealthUpdateUsageDescription`, `NSHealthShareUsageDescription`
+- `health` package (v10.2.0) has a known ObjC/Swift header issue with static libraries.
+  **Fix**: `ios/Podfile` `post_install` patches `HealthPlugin.m` to use `#import "health-Swift.h"` (relative) instead of `#import <health/health-Swift.h>` (framework-style). This patch modifies the file in `~/.pub-cache` via the `.symlinks` path — re-runs automatically on every `pod install`.
+- If upgrading `health` version: verify the patch still applies (check `HealthPlugin.m` in the new version).

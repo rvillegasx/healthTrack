@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health_track/models/health_record.dart';
+import 'package:health_track/services/health_kit_service.dart';
 import 'package:health_track/services/sheets_service.dart';
 
 final sheetsServiceProvider = Provider<SheetsService>((_) => SheetsService());
+final healthKitServiceProvider = Provider<HealthKitService>((_) => HealthKitService());
 
 final selectedTabProvider = StateProvider<int>((_) => 0);
 
@@ -25,10 +27,15 @@ class RecordsNotifier extends AsyncNotifier<List<HealthRecord>> {
     state = await AsyncValue.guard(_fetch);
   }
 
-  Future<void> addRecord(HealthRecord record) async {
-    final service = ref.read(sheetsServiceProvider);
-    await service.appendRecord(record);
+  Future<HealthKitStatus> addRecord(HealthRecord record) async {
+    final sheetsService = ref.read(sheetsServiceProvider);
+    await sheetsService.appendRecord(record);
+
+    final hkService = ref.read(healthKitServiceProvider);
+    final hkStatus = await hkService.writeRecord(record);
+
     await refresh();
+    return hkStatus;
   }
 
   Future<void> deleteRecord(HealthRecord record) async {

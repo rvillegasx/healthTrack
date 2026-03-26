@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
-# platform :ios, '13.0'
+platform :ios, '14.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -35,6 +35,17 @@ target 'Runner' do
 end
 
 post_install do |installer|
+  # Fix health Swift header: change framework-style import to relative import.
+  # Flutter Flutter plugins use symlinks so the file resolves to the pub cache.
+  # This patch is idempotent — it only writes if the old string is present.
+  health_plugin_m = File.join(File.dirname(File.realpath(__FILE__)),
+    '.symlinks', 'plugins', 'health', 'ios', 'Classes', 'HealthPlugin.m')
+  if File.exist?(health_plugin_m)
+    content = File.read(health_plugin_m)
+    patched = content.gsub('#import <health/health-Swift.h>', '#import "health-Swift.h"')
+    File.write(health_plugin_m, patched) if patched != content
+  end
+
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
   end

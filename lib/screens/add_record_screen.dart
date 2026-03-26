@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health_track/models/health_record.dart';
 import 'package:health_track/providers/records_provider.dart';
+import 'package:health_track/services/health_kit_service.dart';
 
 const _measurementTimes = [
   'Before Breakfast',
@@ -65,13 +66,21 @@ class _AddRecordScreenState extends ConsumerState<AddRecordScreen> {
             _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       );
 
-      await ref.read(recordsProvider.notifier).addRecord(record);
+      final hkStatus = await ref.read(recordsProvider.notifier).addRecord(record);
 
       if (!mounted) return;
+      FocusScope.of(context).unfocus();
       _clearForm();
+
+      final hkSuffix = switch (hkStatus) {
+        HealthKitStatus.success => '  •  Apple Health saved',
+        HealthKitStatus.failed => '  •  Apple Health: check permissions',
+        HealthKitStatus.noData => '',
+      };
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Record saved successfully'),
+        SnackBar(
+          content: Text('Record saved$hkSuffix'),
           backgroundColor: Colors.green,
         ),
       );

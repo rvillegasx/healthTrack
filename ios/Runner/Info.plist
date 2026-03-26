@@ -28,6 +28,10 @@
 	<true/>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Use Face ID to unlock HealthTrack</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>HealthTrack reads health data to display your records.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>HealthTrack saves your blood pressure, heart rate and glucose to Apple Health.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
