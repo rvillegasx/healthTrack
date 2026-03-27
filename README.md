@@ -77,42 +77,71 @@ flutter pub get
 
 ---
 
-## Running on iPhone (Direct Install via Xcode)
+## Running the App
 
-### Option A — Command line
+### Debug mode (development)
+
+Conecta el iPhone por USB y corre:
 
 ```bash
-# List connected devices
+# Ver dispositivos disponibles
 flutter devices
 
-# Run on your iPhone (replace DEVICE_ID with your device ID from above)
+# Correr en debug en tu iPhone (obtén el DEVICE_ID del comando anterior)
 flutter run -d <DEVICE_ID>
 ```
 
-### Option B — Xcode
+El modo debug incluye hot reload (`r`), hot restart (`R`), y el banner de debug en la esquina.
+Los logs de la app se imprimen en la terminal en tiempo real.
 
-1. Open the project in Xcode:
+Para ver solo los logs del dispositivo sin correr desde Flutter:
+
+```bash
+flutter logs -d <DEVICE_ID>
+```
+
+#### Alternativa — Xcode
+
+1. Abre el proyecto:
    ```bash
    open ios/Runner.xcworkspace
    ```
-2. Select your iPhone as the target device (top bar)
-3. Set up signing:
-   - Click **Runner** in the project navigator
-   - Go to **Signing & Capabilities** tab
-   - Enable **Automatically manage signing**
-   - Select your **Team** (your Apple ID — free account works)
-   - Change **Bundle Identifier** to something unique, e.g. `com.yourname.healthtrack`
-4. Press **Run** (▶)
+2. Selecciona tu iPhone como target (barra superior)
+3. Configura firma:
+   - Click en **Runner** en el navegador del proyecto
+   - Tab **Signing & Capabilities**
+   - Activa **Automatically manage signing**
+   - Selecciona tu **Team** (tu Apple ID — cuenta gratuita funciona)
+   - Cambia **Bundle Identifier** a algo único, ej. `com.tunombre.healthtrack`
+4. Presiona **Run** (▶)
 
-> On first install, you must trust the developer certificate on the iPhone:
-> Settings > General > VPN & Device Management > your Apple ID > Trust
+> En la primera instalación debes confiar en el certificado desde el iPhone:
+> Ajustes > General > VPN y gestión de dispositivos > tu Apple ID > Confiar
 
-### Build Release (no debug banner, optimized)
+---
+
+### Release (deploy a iPhone sin cable)
+
+El build de release elimina el banner de debug, está optimizado y se puede usar sin tener la Mac conectada.
 
 ```bash
+# 1. Compilar el build de release
 flutter build ios --release
+
+# 2. Instalar directamente en el iPhone conectado por USB
+flutter install -d <DEVICE_ID>
 ```
-Then open `ios/Runner.xcworkspace` in Xcode and run on device.
+
+O desde Xcode después del build:
+
+```bash
+open ios/Runner.xcworkspace
+```
+
+Selecciona tu iPhone como target y presiona **Run** (▶). Xcode instala el `.app` compilado en release.
+
+> El certificado de desarrollador gratuito expira cada 7 días. Cuando la app deje de abrir,
+> repite el paso 2 (`flutter build ios --release && flutter install -d <DEVICE_ID>`).
 
 ---
 

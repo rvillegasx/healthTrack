@@ -73,3 +73,4 @@ Both are in `.gitignore`. Use `.env.example` as the template.
 - `health` package (v10.2.0) has a known ObjC/Swift header issue with static libraries.
   **Fix**: `ios/Podfile` `post_install` patches `HealthPlugin.m` to use `#import "health-Swift.h"` (relative) instead of `#import <health/health-Swift.h>` (framework-style). This patch modifies the file in `~/.pub-cache` via the `.symlinks` path — re-runs automatically on every `pod install`.
 - If upgrading `health` version: verify the patch still applies (check `HealthPlugin.m` in the new version).
+- **Blood pressure must use `Health().writeBloodPressure(systolic:, diastolic:, startTime:)`** — NOT `writeHealthData` por separado. HealthKit requiere ambos valores como una `HKBloodPressureCorrelation`; escribirlos separados falla silenciosamente.

@@ -42,19 +42,12 @@ class HealthKitService {
       var allSucceeded = true;
 
       if (hasBP) {
-        final systolicOk = await _health.writeHealthData(
-          value: record.systolicInt!.toDouble(),
-          type: HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
+        final bpOk = await _health.writeBloodPressure(
+          systolic: record.systolicInt!,
+          diastolic: record.diastolicInt!,
           startTime: timestamp,
-          unit: HealthDataUnit.MILLIMETER_OF_MERCURY,
         );
-        final diastolicOk = await _health.writeHealthData(
-          value: record.diastolicInt!.toDouble(),
-          type: HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
-          startTime: timestamp,
-          unit: HealthDataUnit.MILLIMETER_OF_MERCURY,
-        );
-        if (!systolicOk || !diastolicOk) allSucceeded = false;
+        if (!bpOk) allSucceeded = false;
       }
 
       if (hasHR) {
