@@ -41,7 +41,7 @@ class RecordCard extends StatelessWidget {
                 Icon(Icons.schedule, size: 14, color: colorScheme.outline),
                 const SizedBox(width: 4),
                 Text(
-                  DateFormat('MMM d, yyyy  HH:mm').format(record.date),
+                  DateFormat('EEE, MMM d, yyyy  HH:mm').format(record.date),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const Spacer(),
