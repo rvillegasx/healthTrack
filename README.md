@@ -130,6 +130,7 @@ flutter build ios --release
 
 # 2. Instalar directamente en el iPhone conectado por USB
 flutter install -d <DEVICE_ID>
+flutter install -d 00008140-001A3DE20A53001C
 ```
 
 O desde Xcode después del build:
