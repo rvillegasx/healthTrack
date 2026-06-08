@@ -4,15 +4,11 @@ PODS:
   - Flutter (1.0.0)
   - health (1.0.4):
     - Flutter
-  - local_auth_darwin (0.0.1):
-    - Flutter
-    - FlutterMacOS
 
 DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - health (from `.symlinks/plugins/health/ios`)
-  - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
 
 EXTERNAL SOURCES:
   device_info_plus:
@@ -21,15 +17,12 @@ EXTERNAL SOURCES:
     :path: Flutter
   health:
     :path: ".symlinks/plugins/health/ios"
-  local_auth_darwin:
-    :path: ".symlinks/plugins/local_auth_darwin/darwin"
 
 SPEC CHECKSUMS:
-  device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
+  device_info_plus: 71ffc6ab7634ade6267c7a93088ed7e4f74e5896
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  health: 5a380c0f6c4f619535845992993964293962e99e
-  local_auth_darwin: 66e40372f1c29f383a314c738c7446e2f7fdadc3
+  health: a38a2b7480871e575ef403a8746cb2c08d20f1a4
 
 PODFILE CHECKSUM: 93f73a09bccba28eff9c5c54413ccfe298da00ea
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

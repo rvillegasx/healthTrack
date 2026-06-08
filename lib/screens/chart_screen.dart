@@ -34,13 +34,31 @@ class ChartScreen extends ConsumerWidget {
   }
 }
 
-class _GlucoseChart extends StatelessWidget {
+enum _ChartRange { ten, twenty, all }
+
+class _GlucoseChart extends StatefulWidget {
   final List<HealthRecord> records;
   const _GlucoseChart({required this.records});
 
   @override
+  State<_GlucoseChart> createState() => _GlucoseChartState();
+}
+
+class _GlucoseChartState extends State<_GlucoseChart> {
+  _ChartRange _range = _ChartRange.ten;
+
+  List<HealthRecord> get _filtered {
+    if (_range == _ChartRange.all) return widget.records;
+    final count = _range == _ChartRange.ten ? 10 : 20;
+    if (widget.records.length <= count) return widget.records;
+    return widget.records.sublist(widget.records.length - count);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final records = _filtered;
+
     final spots = records.asMap().entries.map((e) {
       return FlSpot(e.key.toDouble(), e.value.glucoseDouble!);
     }).toList();
@@ -58,16 +76,25 @@ class _GlucoseChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Legend
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _LegendDot(color: colorScheme.primary),
-              const SizedBox(width: 4),
-              const Text('Glucose (mg/dL)'),
-              const SizedBox(width: 16),
-              _LegendDot(color: Colors.green.shade300),
-              const SizedBox(width: 4),
-              const Text('Normal range (70–100)'),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _LegendDot(color: colorScheme.primary),
+                  const SizedBox(width: 4),
+                  const Text('Glucose', style: TextStyle(fontSize: 12)),
+                  const SizedBox(width: 12),
+                  _LegendDot(color: Colors.green.shade300),
+                  const SizedBox(width: 4),
+                  const Text('70–100 mg/dL', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+              _RangeSelector(
+                selected: _range,
+                onChanged: (r) => setState(() => _range = r),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -130,7 +157,6 @@ class _GlucoseChart extends StatelessWidget {
                   rightTitles:
                       const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
-                // Normal fasting range shading (70–100)
                 extraLinesData: ExtraLinesData(
                   horizontalLines: [
                     HorizontalLine(
@@ -193,6 +219,70 @@ class _GlucoseChart extends StatelessWidget {
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RangeSelector extends StatelessWidget {
+  final _ChartRange selected;
+  final ValueChanged<_ChartRange> onChanged;
+
+  const _RangeSelector({required this.selected, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _RangeButton(label: '10r', active: selected == _ChartRange.ten, onTap: () => onChanged(_ChartRange.ten), colorScheme: colorScheme),
+        const SizedBox(width: 4),
+        _RangeButton(label: '20r', active: selected == _ChartRange.twenty, onTap: () => onChanged(_ChartRange.twenty), colorScheme: colorScheme),
+        const SizedBox(width: 4),
+        _RangeButton(label: 'All', active: selected == _ChartRange.all, onTap: () => onChanged(_ChartRange.all), colorScheme: colorScheme),
+      ],
+    );
+  }
+}
+
+class _RangeButton extends StatelessWidget {
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+  final ColorScheme colorScheme;
+
+  const _RangeButton({
+    required this.label,
+    required this.active,
+    required this.onTap,
+    required this.colorScheme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: active ? colorScheme.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: active ? colorScheme.primary : colorScheme.outlineVariant,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: active ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+          ),
+        ),
       ),
     );
   }
