@@ -62,7 +62,7 @@ Both are in `.gitignore`. Use `.env.example` as the template.
 - Parser supports both `YYYY/MM/DD` (new) and `MM/DD/YYYY` (legacy records)
 - `HealthRecord.rowIndex` (0-based) is set at fetch time and used for deletion via `batchUpdate`
 - After saving a new record, app navigates automatically to Records tab (`selectedTabProvider`)
-- Delete requires swipe-left → red button → confirmation dialog
+- Swipe-left exposes two actions: **Health** (pink — manually re-push record to HealthKit via `RecordsNotifier.pushToHealthKit`, shows result SnackBar) and **Delete** (red → confirmation dialog)
 - UI language: English
 
 ## iOS / HealthKit
@@ -74,3 +74,4 @@ Both are in `.gitignore`. Use `.env.example` as the template.
   **Fix**: `ios/Podfile` `post_install` patches `HealthPlugin.m` to use `#import "health-Swift.h"` (relative) instead of `#import <health/health-Swift.h>` (framework-style). This patch modifies the file in `~/.pub-cache` via the `.symlinks` path — re-runs automatically on every `pod install`.
 - If upgrading `health` version: verify the patch still applies (check `HealthPlugin.m` in the new version).
 - **Blood pressure must use `Health().writeBloodPressure(systolic:, diastolic:, startTime:)`** — NOT `writeHealthData` por separado. HealthKit requiere ambos valores como una `HKBloodPressureCorrelation`; escribirlos separados falla silenciosamente.
+- **Write permissions are per data type and fail silently.** iOS `requestAuthorization` returns `true` even when write access was denied, so a missing toggle = silent no-op (this bit us on a fresh install where Blood Pressure was off). On a new install/device, verify **Settings ▸ Health ▸ Data Access & Devices ▸ HealthTrack** has Blood Pressure, Heart Rate AND Blood Glucose all enabled. `HealthKitService.writeRecord` logs each write with `debugPrint('[HealthKit] ...')`; use the swipe-left **Health** action to retry a single record and read the result.

@@ -6,7 +6,13 @@ import 'package:intl/intl.dart';
 class RecordCard extends StatelessWidget {
   final HealthRecord record;
   final VoidCallback? onDelete;
-  const RecordCard({super.key, required this.record, this.onDelete});
+  final VoidCallback? onPushToHealth;
+  const RecordCard({
+    super.key,
+    required this.record,
+    this.onDelete,
+    this.onPushToHealth,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +22,15 @@ class RecordCard extends StatelessWidget {
       key: ValueKey(record.rowIndex),
       endActionPane: ActionPane(
         motion: const BehindMotion(),
-        extentRatio: 0.22,
+        extentRatio: 0.44,
         children: [
+          SlidableAction(
+            onPressed: (_) => onPushToHealth?.call(),
+            backgroundColor: Colors.pink.shade400,
+            foregroundColor: Colors.white,
+            icon: Icons.favorite,
+            label: 'Health',
+          ),
           SlidableAction(
             onPressed: (_) => onDelete?.call(),
             backgroundColor: Colors.red,

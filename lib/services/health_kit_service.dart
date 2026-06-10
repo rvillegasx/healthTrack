@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:health/health.dart';
 import 'package:health_track/models/health_record.dart';
 
@@ -20,7 +21,8 @@ class HealthKitService {
         _writeTypes,
         permissions: permissions,
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[HealthKit] requestAuthorization threw: $e');
       return false;
     }
   }
@@ -36,6 +38,7 @@ class HealthKitService {
 
     try {
       final granted = await _requestPermissions();
+      debugPrint('[HealthKit] requestAuthorization granted=$granted');
       if (!granted) return HealthKitStatus.failed;
 
       final timestamp = record.date;
@@ -47,6 +50,8 @@ class HealthKitService {
           diastolic: record.diastolicInt!,
           startTime: timestamp,
         );
+        debugPrint('[HealthKit] writeBloodPressure '
+            '${record.systolicInt}/${record.diastolicInt} -> $bpOk');
         if (!bpOk) allSucceeded = false;
       }
 
@@ -57,6 +62,7 @@ class HealthKitService {
           startTime: timestamp,
           unit: HealthDataUnit.BEATS_PER_MINUTE,
         );
+        debugPrint('[HealthKit] writeHeartRate ${record.heartRateInt} -> $hrOk');
         if (!hrOk) allSucceeded = false;
       }
 
@@ -67,11 +73,13 @@ class HealthKitService {
           startTime: timestamp,
           unit: HealthDataUnit.MILLIGRAM_PER_DECILITER,
         );
+        debugPrint('[HealthKit] writeGlucose ${record.glucoseDouble} -> $glucoseOk');
         if (!glucoseOk) allSucceeded = false;
       }
 
       return allSucceeded ? HealthKitStatus.success : HealthKitStatus.failed;
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('[HealthKit] writeRecord threw: $e\n$st');
       return HealthKitStatus.failed;
     }
   }

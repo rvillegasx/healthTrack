@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:health_track/models/health_record.dart';
 import 'package:health_track/providers/records_provider.dart';
+import 'package:health_track/services/health_kit_service.dart';
 import 'package:health_track/widgets/record_card.dart';
 
 class RecordsScreen extends ConsumerStatefulWidget {
@@ -25,6 +27,39 @@ class _RecordsScreenState extends ConsumerState<RecordsScreen> {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       }
     });
+  }
+
+  Future<void> _pushToHealth(HealthRecord record) async {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text('Pushing to Apple Health…'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    final status =
+        await ref.read(recordsProvider.notifier).pushToHealthKit(record);
+    if (!mounted) return;
+
+    final (message, color) = switch (status) {
+      HealthKitStatus.success => ('Saved to Apple Health ✓', Colors.green),
+      HealthKitStatus.noData => ('No BP / HR / glucose to push', Colors.orange),
+      HealthKitStatus.failed => (
+          'Failed — check Health permissions (Settings ▸ Health ▸ Data Access)',
+          Colors.red,
+        ),
+    };
+
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: color,
+          duration: const Duration(seconds: 4),
+        ),
+      );
   }
 
   @override
@@ -85,6 +120,7 @@ class _RecordsScreenState extends ConsumerState<RecordsScreen> {
               itemCount: records.length,
               itemBuilder: (context, i) => RecordCard(
                 record: records[i],
+                onPushToHealth: () => _pushToHealth(records[i]),
                 onDelete: () async {
                   final confirmed = await showDialog<bool>(
                     context: context,

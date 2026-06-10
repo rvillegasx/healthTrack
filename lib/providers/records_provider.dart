@@ -38,6 +38,14 @@ class RecordsNotifier extends AsyncNotifier<List<HealthRecord>> {
     return hkStatus;
   }
 
+  /// Manually re-pushes an existing record to Apple Health.
+  /// Used for troubleshooting / retrying records whose HealthKit write
+  /// failed silently (e.g. permissions not yet granted at save time).
+  Future<HealthKitStatus> pushToHealthKit(HealthRecord record) async {
+    final hkService = ref.read(healthKitServiceProvider);
+    return hkService.writeRecord(record);
+  }
+
   Future<void> deleteRecord(HealthRecord record) async {
     if (record.rowIndex == null) return;
     final service = ref.read(sheetsServiceProvider);

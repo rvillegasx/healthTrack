@@ -7,7 +7,8 @@ Not published to the App Store — installed directly via Xcode.
 
 - View all health records from Google Sheets (oldest to newest, auto-scrolls to latest)
 - Add new records (blood pressure, heart rate, glucose, measurement time, notes)
-- Delete records with swipe-left → confirmation dialog
+- Writes records to Apple Health (HealthKit) automatically on save
+- Swipe-left actions: **Health** (manually re-push a record to Apple Health) and **Delete** (→ confirmation dialog)
 - Glucose chart with normal range reference lines (70–100 mg/dL)
 - Face ID / passcode lock screen
 
@@ -157,6 +158,7 @@ lib/
 │   └── health_record.dart      # Data model + sheet row serialization
 ├── services/
 │   ├── sheets_service.dart     # Google Sheets API (read + append + delete)
+│   ├── health_kit_service.dart # Apple Health (HealthKit) writes
 │   └── auth_service.dart       # Face ID / biometric authentication
 ├── providers/
 │   └── records_provider.dart   # Riverpod state management
@@ -167,7 +169,7 @@ lib/
 │   ├── add_record_screen.dart  # Add new record form
 │   └── chart_screen.dart       # Glucose line chart
 └── widgets/
-    └── record_card.dart        # Individual record display (with swipe-to-delete)
+    └── record_card.dart        # Individual record display (swipe: Health / Delete)
 assets/
 └── credentials/
     └── service_account.json    # GITIGNORED — place manually
@@ -191,6 +193,26 @@ Sheet: `Sheet1` | Data starts at row 3 (rows 1–2 are headers)
 | F | Glucose Level (mg/dL) | 95 |
 | G | Measurement Time | Before Breakfast |
 | H | Notes | (optional) |
+
+---
+
+## Apple Health (HealthKit)
+
+Records are written to Apple Health automatically after each save, and can be
+re-pushed manually by swiping a record left and tapping **Health**.
+
+> **Important — permissions are per data type.** iOS asks for write access to
+> blood pressure, heart rate and glucose *separately*. If any one is left off,
+> that metric fails to save **silently** (`requestAuthorization` returns `true`
+> even when write access was denied). After a fresh install, verify **all**
+> toggles are ON:
+>
+> **Settings ▸ Health ▸ Data Access & Devices ▸ HealthTrack** → enable
+> Blood Pressure, Heart Rate and Blood Glucose.
+>
+> Use the swipe-left **Health** action to retry; the on-screen result and the
+> `[HealthKit]` lines in the Xcode/`flutter run` console tell you which write
+> failed.
 
 ---
 
