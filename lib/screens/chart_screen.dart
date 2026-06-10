@@ -88,7 +88,11 @@ class _GlucoseChartState extends State<_GlucoseChart> {
                   const SizedBox(width: 12),
                   _LegendDot(color: Colors.green.shade300),
                   const SizedBox(width: 4),
-                  const Text('70–100 mg/dL', style: TextStyle(fontSize: 12)),
+                  const Text('70–100', style: TextStyle(fontSize: 12)),
+                  const SizedBox(width: 12),
+                  _LegendDash(color: Colors.orange.shade300),
+                  const SizedBox(width: 4),
+                  const Text('125', style: TextStyle(fontSize: 12)),
                 ],
               ),
               _RangeSelector(
@@ -171,6 +175,12 @@ class _GlucoseChartState extends State<_GlucoseChart> {
                       strokeWidth: 1,
                       dashArray: [6, 4],
                     ),
+                    HorizontalLine(
+                      y: 125,
+                      color: Colors.orange.shade300.withValues(alpha: 0.6),
+                      strokeWidth: 1,
+                      dashArray: [3, 7],
+                    ),
                   ],
                 ),
                 lineBarsData: [
@@ -214,9 +224,20 @@ class _GlucoseChartState extends State<_GlucoseChart> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            '${records.length} readings',
-            style: Theme.of(context).textTheme.bodySmall,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${records.length} readings',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              Text(
+                'Avg: ${(records.map((r) => r.glucoseDouble!).reduce((a, b) => a + b) / records.length).toStringAsFixed(1)} mg/dL',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -298,6 +319,20 @@ class _LegendDot extends StatelessWidget {
       width: 12,
       height: 12,
       decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
+  }
+}
+
+class _LegendDash extends StatelessWidget {
+  final Color color;
+  const _LegendDash({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 16,
+      height: 2,
+      color: color,
     );
   }
 }
