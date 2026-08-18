@@ -105,6 +105,7 @@ service_account.json     assets/credentials/.gitkeep (empty placeholder)
 - [x] Delete record via Google Sheets `batchUpdate` (DeleteDimensionRequest)
 - [x] Date format changed to `YYYY/MM/DD`; parser supports legacy `MM/DD/YYYY`
 - [x] Records ordered oldest-first, newest at bottom; auto-scroll to last on load
+- [x] Dual-curve glucose chart (Fasting vs Post-meal) with date synchronization, reference lines, and independent averages
 
 ---
 

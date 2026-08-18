@@ -9,7 +9,12 @@ Not published to the App Store — installed directly via Xcode.
 - Add new records (blood pressure, heart rate, glucose, measurement time, notes)
 - Writes records to Apple Health (HealthKit) automatically on save
 - Swipe-left actions: **Health** (manually re-push a record to Apple Health) and **Delete** (→ confirmation dialog)
-- Glucose chart with normal range reference lines (70–100 mg/dL)
+- **Dual-curve Glucose Chart:**
+  - Curve 1: **Antes de desayunar / Fasting** (Blue curve)
+  - Curve 2: **Después de comer / Postprandial** (Orange curve)
+  - Synchronized date timeline on the X-axis (`MM/dd`)
+  - Clinical target reference lines: **70–100 mg/dL** (Ayunas) and **< 140 mg/dL** (Postprandial)
+  - Independent average metrics (Avg Ayunas vs Avg Post) and range selector (`10d`, `20d`, `All`)
 - Face ID / passcode lock screen
 
 ---
@@ -18,7 +23,7 @@ Not published to the App Store — installed directly via Xcode.
 
 - macOS with Xcode installed
 - Flutter SDK (>= 3.41.5)
-- iPhone connected via USB (for direct install) or use Simulator
+- iPhone connected via USB (for direct install) or iOS Simulator
 - Google Cloud account with a Service Account
 
 ---
@@ -80,10 +85,19 @@ flutter pub get
 
 ## Running the App
 
-### Debug mode (development)
+### Debug mode (Simulator o Dispositivo de Desarrollo)
 
-Conecta el iPhone por USB y corre:
+#### En Simulador iOS:
+```bash
+# Abrir el simulador y listar dispositivos
+open -a Simulator
+flutter devices
 
+# Correr en el simulador
+flutter run -d <SIMULATOR_ID>
+```
+
+#### En iPhone físico por USB:
 ```bash
 # Ver dispositivos disponibles
 flutter devices
@@ -131,7 +145,6 @@ flutter build ios --release
 
 # 2. Instalar directamente en el iPhone conectado por USB
 flutter install -d <DEVICE_ID>
-flutter install -d 00008140-001A3DE20A53001C
 ```
 
 O desde Xcode después del build:
@@ -144,6 +157,46 @@ Selecciona tu iPhone como target y presiona **Run** (▶). Xcode instala el `.ap
 
 > El certificado de desarrollador gratuito expira cada 7 días. Cuando la app deje de abrir,
 > repite el paso 2 (`flutter build ios --release && flutter install -d <DEVICE_ID>`).
+
+---
+
+## Gestión de Permisos en iPhone (HealthKit y Face ID)
+
+### ¿Qué sucede con los permisos al actualizar o reinstalar la app?
+
+| Situación | ¿Se pierden los permisos? | Acción requerida |
+| :--- | :--- | :--- |
+| **Actualización normal / Nueva versión** (sobreescribir con mismo Bundle ID) | **NO** | iOS preserva automáticamente todos los permisos concedidos. |
+| **Reinstalación limpia** (borrar la app y reinstalar) | **SÍ** | Otorgar permisos en el primer inicio o activarlos en Ajustes. |
+| **Renovación de certificado gratuito (7 días)** | **NO** (si no borras la app antes) | Solo compilar y reinstalar con `flutter install`. |
+
+### Dónde verificar y reactivar los permisos en el iPhone
+
+#### 1. Apple Health (HealthKit) — Glucosa, Presión Arterial y Pulso
+> **Importante:** En iOS los permisos de HealthKit se conceden por tipo de dato y fallan **en silencio** (la función `requestAuthorization` retorna `true` aunque el interruptor esté apagado). Si alguna métrica no se guarda en Apple Health, verifica que todos los interruptores estén encendidos:
+
+- **Ruta desde Ajustes (Settings):**
+  1. Ve a **Ajustes (Settings)** en el iPhone.
+  2. Entra a **Salud (Health)** ▸ **Acceso a datos y dispositivos (Data Access & Devices)**.
+  3. Selecciona **HealthTrack**.
+  4. Activa todos los interruptores de escritura:
+     - **Glucosa en sangre** (*Blood Glucose*)
+     - **Presión arterial sistólica** (*Blood Pressure Systolic*)
+     - **Presión arterial diastólica** (*Blood Pressure Diastolic*)
+     - **Frecuencia cardíaca** (*Heart Rate*)
+- **Ruta alternativa (Desde la app Salud):**
+  1. Abre la app **Salud**.
+  2. Toca tu **foto de perfil** (esquina superior derecha).
+  3. Ve a **Apps** ▸ **HealthTrack** y activa todas las categorías.
+
+> Puedes usar la acción de deslizar a la izquierda (**Health**) en cualquier registro para reintentar la sincronización manual con Apple Health.
+
+#### 2. Face ID / Desbloqueo Biométrico
+- Si la app no pide Face ID o fue denegado inicialmente:
+  1. Ve a **Ajustes (Settings)** en el iPhone.
+  2. Busca **HealthTrack** en la lista de aplicaciones instaladas.
+  3. Activa el interruptor **Face ID**.
+  4. *(Alternativa)*: **Ajustes** ▸ **Face ID y código** ▸ **Otras apps** ▸ Activar **HealthTrack**.
 
 ---
 
@@ -167,7 +220,7 @@ lib/
 │   ├── home_screen.dart        # Bottom tab navigator
 │   ├── records_screen.dart     # Records list
 │   ├── add_record_screen.dart  # Add new record form
-│   └── chart_screen.dart       # Glucose line chart
+│   └── chart_screen.dart       # Dual-curve Glucose line chart
 └── widgets/
     └── record_card.dart        # Individual record display (swipe: Health / Delete)
 assets/
@@ -193,26 +246,6 @@ Sheet: `Sheet1` | Data starts at row 3 (rows 1–2 are headers)
 | F | Glucose Level (mg/dL) | 95 |
 | G | Measurement Time | Before Breakfast |
 | H | Notes | (optional) |
-
----
-
-## Apple Health (HealthKit)
-
-Records are written to Apple Health automatically after each save, and can be
-re-pushed manually by swiping a record left and tapping **Health**.
-
-> **Important — permissions are per data type.** iOS asks for write access to
-> blood pressure, heart rate and glucose *separately*. If any one is left off,
-> that metric fails to save **silently** (`requestAuthorization` returns `true`
-> even when write access was denied). After a fresh install, verify **all**
-> toggles are ON:
->
-> **Settings ▸ Health ▸ Data Access & Devices ▸ HealthTrack** → enable
-> Blood Pressure, Heart Rate and Blood Glucose.
->
-> Use the swipe-left **Health** action to retry; the on-screen result and the
-> `[HealthKit]` lines in the Xcode/`flutter run` console tell you which write
-> failed.
 
 ---
 

@@ -25,7 +25,7 @@ Open Xcode: `open ios/Runner.xcworkspace`
 - **Google Sheets**: Service Account auth via `googleapis` + `googleapis_auth`
 - **Apple Health**: HealthKit integration via `health: ^10.2.0` — writes BP, HR, glucose on save
 - **Auth**: Face ID via `local_auth`
-- **Charts**: `fl_chart`
+- **Charts**: `fl_chart` — Dual-curve glucose line chart (Fasting vs Post-meal) with synchronized date timeline and clinical reference lines (70–100 & 140)
 - **Env**: `flutter_dotenv` loads `.env` bundled as asset
 
 ## Key Files

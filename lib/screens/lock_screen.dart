@@ -31,12 +31,13 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     if (_authenticating) return;
     setState(() => _authenticating = true);
 
+    final available = await _authService.isBiometricAvailable();
     final success = await _authService.authenticate();
 
     if (!mounted) return;
     setState(() => _authenticating = false);
 
-    if (success) {
+    if (success || !available) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
